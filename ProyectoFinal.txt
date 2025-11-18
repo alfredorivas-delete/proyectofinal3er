@@ -1,0 +1,12 @@
+Jeepers Creepers
+
+Datos del proyecto Final
+
+Nombre del proyecto: POS Sneacker's Club 1.0 
+
+Creadores: Rivas Lerma Alfredo Nicolas y Orona Hernandez Diego
+
+Objetivo: eenlazar registro de ventas en un software donde genere tickets y lleve una relacion de venta
+
+Ultima Actualizacion: 18 de Noviembre Del 2025
+
