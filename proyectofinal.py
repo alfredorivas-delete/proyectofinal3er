@@ -65,7 +65,102 @@ def abrir_registro_productos():
    btn_guardar.pack(pady=20)
 
 def abrir_registro_ventas():
-    messagebox.showinfo("Registro de Ventas", "Aquí irá el módulo de registro de ventas.")
+   ven = tk.Toplevel()
+   ven.title("Registro de Ventas")
+   ven.geometry("420x430")
+   ven.resizable(False, False)
+   # ------------------------------------
+   # Cargar productos desde productos.txt
+   # ------------------------------------
+   productos = {} #Este es un Array arreglo para que cuente valores
+   try:
+      BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+      archivof = os.path.join(BASE_DIR,"productos.txt")
+      with open(archivof, "r", encoding="utf-8") as archivo:
+         for linea in archivo:
+            partes = linea.strip().split("|")
+            if len(partes) == 4:
+               idp, desc, precio, cat = partes
+               productos[desc] = float(precio)
+   except FileNotFoundError:
+      messagebox.showerror("Error", "No se encontró el archivo productos.txt")
+      ven.destroy()
+      return
+
+   # Lista de nombres de productos
+   lista_productos = list(productos.keys())
+   # ------------------------------------
+   # CONTROLES VISUALES
+   # ------------------------------------
+   lbl_prod = tk.Label(ven, text="Producto:", font=("Arial", 12))
+   lbl_prod.pack(pady=5)
+   cb_producto = ttk.Combobox(ven, values=lista_productos, font=("Arial", 12), state="readonly")
+   cb_producto.pack(pady=5)
+   lbl_precio = tk.Label(ven, text="Precio:", font=("Arial", 12))
+   lbl_precio.pack(pady=5)
+   txt_precio = tk.Entry(ven, font=("Arial", 12), state="readonly")
+   txt_precio.pack(pady=5)
+   lbl_cantidad = tk.Label(ven, text="Cantidad:", font=("Arial", 12))
+   lbl_cantidad.pack(pady=5)
+   cantidad_var = tk.StringVar(ven)
+   ven.cantidad_var = cantidad_var   # importante: mantiene la referencia
+   txt_cantidad = tk.Entry(ven, font=("Arial", 12), textvariable=cantidad_var)
+   txt_cantidad.pack(pady=5)  
+   cantidad_var.trace_add("write", lambda *args: calcular_total())
+   lbl_total = tk.Label(ven, text="Total:", font=("Arial", 12))
+   lbl_total.pack(pady=5)
+   txt_total = tk.Entry(ven, font=("Arial", 12), state="readonly")
+   txt_total.pack(pady=5)
+   # ------------------------------------
+   # FUNCIONES
+   # ------------------------------------
+   def actualizar_precio(event):      
+      prod = cb_producto.get()
+      if prod in productos:
+         txt_precio.config(state="normal")
+         txt_precio.delete(0, tk.END)
+         txt_precio.insert(0, productos[prod])
+         txt_precio.config(state="readonly")
+         calcular_total()
+   def calcular_total(*args):      
+      try:
+         cant = int(txt_cantidad.get())
+         precio = float(txt_precio.get())
+         total = cant * precio
+         txt_total.config(state="normal")
+         txt_total.delete(0, tk.END)
+         txt_total.insert(0, total)
+         txt_total.config(state="readonly")
+      except:
+         # Si no hay número válido, limpiar el total
+         txt_total.config(state="normal")
+         txt_total.delete(0, tk.END)
+         txt_total.config(state="readonly")
+   def registrar_venta():
+      prod = cb_producto.get()
+      precio = txt_precio.get()
+      cant = txt_cantidad.get()
+      total = txt_total.get()
+      if prod == "" or precio == "" or cant == "" or total == "":
+         messagebox.showwarning("Campos Vacíos", "Todos los campos deben estar completos.")
+         return
+      # Guardar venta
+      BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+      archivov = os.path.join(BASE_DIR,"ventas")
+      with open(archivov, "a", encoding="utf-8") as archivo:
+         archivo.write(f"{prod}|{precio}|{cant}|{total}\n")
+         messagebox.showinfo("Venta Registrada", "La venta se registró correctamente.")
+      # Limpiar campos
+      cb_producto.set("")
+      txt_precio.config(state="normal"); txt_precio.delete(0, tk.END); txt_precio.config(state="readonly")
+      txt_cantidad.delete(0, tk.END)
+      txt_total.config(state="normal"); txt_total.delete(0, tk.END); txt_total.config(state="readonly")
+   # ------------------------------------
+   # EVENTOS Y BOTÓN
+   # ------------------------------------
+   cb_producto.bind("<<ComboboxSelected>>", actualizar_precio)
+   btn_guardar = ttk.Button(ven, text="Registrar Venta", command=registrar_venta)
+   btn_guardar.pack(pady=25)
 
 def abrir_reportes():
     messagebox.showinfo("Reportes", "Aquí irá el módulo de reportes.")
