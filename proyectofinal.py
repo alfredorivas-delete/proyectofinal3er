@@ -63,7 +63,40 @@ def abrir_registro_productos():
    # --- Botón Guardar ---
    btn_guardar = tk.Button(reg, text="Guardar Producto", command=guardar_producto)
    btn_guardar.pack(pady=20)
+   
 
+from datetime import datetime
+
+def mostrar_ticket(producto, precio, cantidad, total):
+  ticket = tk.Toplevel()
+  ticket.title("Ticket de Venta")
+  ticket.geometry("300x350")
+  ticket.resizable(False, False)
+
+  # Fecha y hora
+  fecha_hora = datetime.now().strftime("%d/%m/%Y %I:%M:%S %p")
+
+  # Texto del ticket
+  texto = (
+  " *** PUNTO DE VENTA ***\n"
+  "--------------------------------------\n"
+  f"Fecha: {fecha_hora}\n"
+  "--------------------------------------\n"
+  f"Producto: {producto}\n"
+  f"Precio: ${precio}\n"
+  f"Cantidad: {cantidad}\n"
+  "--------------------------------------\n"
+  f"TOTAL: ${total}\n"
+  "--------------------------------------\n"
+  " ¡GRACIAS POR SU COMPRA!\n"
+  )
+
+  lbl_ticket = tk.Label(ticket, text=texto, justify="left", font=("Consolas", 11))
+  lbl_ticket.pack(pady=15)
+
+  btn_cerrar = ttk.Button(ticket, text="Cerrar", command=ticket.destroy)
+  btn_cerrar.pack(pady=10)
+   
 def abrir_registro_ventas():
    ven = tk.Toplevel()
    ven.title("Registro de Ventas")
@@ -72,6 +105,7 @@ def abrir_registro_ventas():
    # ------------------------------------
    # Cargar productos desde productos.txt
    # ------------------------------------
+   
    productos = {} #Este es un Array arreglo para que cuente valores
    try:
       BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -150,6 +184,7 @@ def abrir_registro_ventas():
       with open(archivov, "a", encoding="utf-8") as archivo:
          archivo.write(f"{prod}|{precio}|{cant}|{total}\n")
          messagebox.showinfo("Venta Registrada", "La venta se registró correctamente.")
+         mostrar_ticket(prod, precio, cant, total) 
       # Limpiar campos
       cb_producto.set("")
       txt_precio.config(state="normal"); txt_precio.delete(0, tk.END); txt_precio.config(state="readonly")
@@ -163,11 +198,69 @@ def abrir_registro_ventas():
    btn_guardar.pack(pady=25)
 
 def abrir_reportes():
-    messagebox.showinfo("Reportes", "Aquí irá el módulo de reportes.")
+  ventana = tk.Toplevel()
+  ventana.title("Reporte de Ventas")
+  ventana.geometry("700x400")
+  ventana.configure(bg="#f2f2f2")
 
+  titulo = tk.Label(ventana, text="Reporte de Ventas Realizadas",
+  font=("Arial", 16, "bold"), bg="#f2f2f2")
+  titulo.pack(pady=10)
+
+  # Frame para el GRID
+  frame_tabla = tk.Frame(ventana)
+  frame_tabla.pack(pady=10)
+
+  # Columnas del archivo ventas.txt
+  columnas = ("producto", "precio", "cantidad", "total")
+
+  tabla = ttk.Treeview(frame_tabla, columns=columnas, show="headings", height=15)
+
+  # Encabezados
+  tabla.heading("producto", text="Producto")
+  tabla.heading("precio", text="Precio")
+  tabla.heading("cantidad", text="Cantidad")
+  tabla.heading("total", text="Total")
+
+  # Tamaño de columnas
+  tabla.column("producto", width=250, anchor="center")
+  tabla.column("precio", width=100, anchor="center")
+  tabla.column("cantidad", width=100, anchor="center")
+  tabla.column("total", width=120, anchor="center")
+
+  tabla.pack()
+
+  # --- Leer archivo ventas.txt ---
+  try:
+    with open("ventas.txt", "r", encoding="utf-8") as archivo:
+     for linea in archivo:
+      if linea.strip():
+        datos = linea.strip().split("|")
+        if len(datos) == 4:
+          tabla.insert("", tk.END, values=datos)
+  except FileNotFoundError:
+    messagebox.showerror("Error", "El archivo ventas.txt no existe.")
+    ventana.destroy()
+    return
+    mostrar_reporte_ventas()
+# Ejecución individual para pruebas:
+if __name__ == "__main__":
+ root = tk.Tk()
+ root.withdraw()
+ 
 def abrir_acerca_de():
-    messagebox.showinfo("Acerca de", "Punto de Venta de Ropa\nProyecto Escolar\nVersión 1.0")
-
+    acerca = tk.Toplevel()
+    acerca.title("Acerca de")
+    acerca.geometry("1000x1000")
+    
+    #Etiquetas y Campos de Texto 
+    lbl_id = tk.Label(acerca, text="Software Pos Sneacker's Club 2025", font=("Arial",14))
+    lbl_id.pack(pady=5)
+    lbl_creado = tk.Label (acerca, text="Creado por: Alfredo Nicolas Rivas Lerma y Orona Hernandez Diego", font=("Arial", 12) )
+    lbl_creado.pack(pady=5)
+    lbl_grupo = tk.Label (acerca, text="Grupo: 3A Prog Vesp", font=("Arial", 12))
+    lbl_grupo.pack(pady=5)
+    
 # VENTANA PRINCIPAL
 ventana = tk.Tk()
 ventana.title("POS Sneaker's Club")
